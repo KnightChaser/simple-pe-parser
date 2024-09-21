@@ -22,6 +22,7 @@ void parse(LPVOID peFileData) {
 	printf("[+] Parsing the PE file...\n");
 	readDosHeader(peFileData);
 	readNTHeader(peFileData);
+	readNTFileDataDirectoryEntries(peFileData);
 }
 
 void readDosHeader(LPVOID peFileData) {
@@ -91,7 +92,7 @@ void readNTFileHeader(LPVOID peFileData) {
 
 void readNTFileOptionalHeader32(LPVOID peFileData) {
 	PIMAGE_NT_HEADERS peFileNtHeader = (PIMAGE_NT_HEADERS)((BYTE*)peFileData + ((PIMAGE_DOS_HEADER)peFileData)->e_lfanew);
-	PIMAGE_OPTIONAL_HEADER32 peFileNtOptionalHeader32 = &peFileNtHeader->OptionalHeader;
+	PIMAGE_OPTIONAL_HEADER32 peFileNtOptionalHeader32 = (PIMAGE_OPTIONAL_HEADER32)(&peFileNtHeader->OptionalHeader);
 
 	printf("    Magic:                                 0x%04X (PE32)\n", peFileNtOptionalHeader32->Magic);
 	printf("    Major linker version:                  0x%02X\n", peFileNtOptionalHeader32->MajorLinkerVersion);
@@ -160,4 +161,20 @@ void readNTFileOptionalHeader64(LPVOID peFileData) {
 	printf("    Size of heap commit:                   0x%016llX (-> %lld Bytes)\n", peFileNtOptionalHeader64->SizeOfHeapCommit, peFileNtOptionalHeader64->SizeOfHeapCommit);
 	printf("    Loader flags:                          0x%08X\n", peFileNtOptionalHeader64->LoaderFlags);
 	printf("    Number of RVA and sizes:               0x%08X\n", peFileNtOptionalHeader64->NumberOfRvaAndSizes);
+}
+
+void readNTFileDataDirectoryEntries(LPVOID peFileData) {
+	PIMAGE_NT_HEADERS peFileNtHeader = (PIMAGE_NT_HEADERS)((BYTE*)peFileData + ((PIMAGE_DOS_HEADER)peFileData)->e_lfanew);
+	PIMAGE_OPTIONAL_HEADER peFileNtOptionalHeader = &peFileNtHeader->OptionalHeader;
+
+	printf("[~] DATA DIRECTORY ENTRIES\n");
+	printf("    +----------+-----------------------------------+---------------------+------------+\n");
+	printf("    |  Index   |          Directory Name           |   Virtual Address   |    Size    |\n");
+	printf("    +----------+-----------------------------------+---------------------+------------+\n");
+	for (int i = 0; i < peFileNtOptionalHeader->NumberOfRvaAndSizes; i++) {
+		printf("    |    %02d    | %33s |  0x%016llX | 0x%08X |\n", i, getNTImageOptionalHeaderDataDirectoryName(i), 
+																		peFileNtOptionalHeader->DataDirectory[i].VirtualAddress, 
+																		peFileNtOptionalHeader->DataDirectory[i].Size);
+	}
+	printf("    +----------+-----------------------------------+---------------------+------------+\n");
 }

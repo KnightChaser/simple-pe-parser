@@ -170,3 +170,40 @@ void dissectNTImageOptionalHeaderDLLCharacteristics(DWORD characteristics) {
 	if (characteristics & IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE)
 		printf("        - (0x%08X) Terminal Server aware\n", IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE);
 }
+
+char* getNTImageOptionalHeaderDataDirectoryName(DWORD dataDirectoryIndex) {
+	switch (dataDirectoryIndex) {
+		case IMAGE_DIRECTORY_ENTRY_EXPORT:
+			return "Export Directory";
+		case IMAGE_DIRECTORY_ENTRY_IMPORT:
+			return "Import Directory";
+		case IMAGE_DIRECTORY_ENTRY_RESOURCE:
+			return "Resource Directory";
+		case IMAGE_DIRECTORY_ENTRY_EXCEPTION:
+			return "Exception Directory";
+		case IMAGE_DIRECTORY_ENTRY_SECURITY:
+			return "Security Directory";
+		case IMAGE_DIRECTORY_ENTRY_BASERELOC:
+			return "Base Relocation Table";
+		case IMAGE_DIRECTORY_ENTRY_DEBUG:
+			return "Debug Directory";
+		case IMAGE_DIRECTORY_ENTRY_ARCHITECTURE:
+			return "Architecture Specific Data";
+		case IMAGE_DIRECTORY_ENTRY_GLOBALPTR:
+			return "Global Pointer Register";
+		case IMAGE_DIRECTORY_ENTRY_TLS:
+			return "Thread Local Storage Directory";
+		case IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG:
+			return "Load Configuration Directory";
+		case IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT:
+			return "Bound Import Directory in headers";
+		case IMAGE_DIRECTORY_ENTRY_IAT:
+			return "Import Address Table";
+		case IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT:
+			return "Delay Load Import Descriptors";
+		case IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR:
+			return "COM Runtime descriptor";
+		default:
+			return "Unknown";
+	}
+}
