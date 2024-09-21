@@ -19,43 +19,6 @@ char* getNTImageFileHeaderMachineType(WORD machineType) {
 	}
 }
 
-char* getNTImageCharacteristics(DWORD characteristics) {
-	switch (characteristics) {
-		case IMAGE_FILE_RELOCS_STRIPPED:
-			return "Relocation information stripped from file";
-		case IMAGE_FILE_EXECUTABLE_IMAGE:
-			return "File is executable";
-		case IMAGE_FILE_LINE_NUMS_STRIPPED:
-			return "Line numbers stripped from file";
-		case IMAGE_FILE_LOCAL_SYMS_STRIPPED:
-			return "Local symbols stripped from file";
-		case IMAGE_FILE_AGGRESIVE_WS_TRIM:
-			return "Aggressively trim working set";
-		case IMAGE_FILE_LARGE_ADDRESS_AWARE:
-			return "Application can handle > 2GB addresses";
-		case IMAGE_FILE_BYTES_REVERSED_LO:
-			return "Bytes of machine word are reversed";
-		case IMAGE_FILE_32BIT_MACHINE:
-			return "32-bit machine";
-		case IMAGE_FILE_DEBUG_STRIPPED:
-			return "Debugging information stripped from file in .DBG file";
-		case IMAGE_FILE_REMOVABLE_RUN_FROM_SWAP:
-			return "If image is on removable media, copy and run from swap file";
-		case IMAGE_FILE_NET_RUN_FROM_SWAP:
-			return "If image is on network media, copy and run from swap file";
-		case IMAGE_FILE_SYSTEM:
-			return "System file";
-		case IMAGE_FILE_DLL:
-			return "File is a DLL";
-		case IMAGE_FILE_UP_SYSTEM_ONLY:
-			return "File should only be run on a UP machine";
-		case IMAGE_FILE_BYTES_REVERSED_HI:
-			return "Bytes of machine word are reversed";
-		default:
-			return "Unknown";
-	}
-}
-
 void dissectNTImageCharacteristics(DWORD characteristics) {
 	printf("    Characteristics:                       0x%08X\n", characteristics);
 

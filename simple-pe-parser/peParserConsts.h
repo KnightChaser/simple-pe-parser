@@ -10,7 +10,6 @@
 #include <Windows.h>
 
 char* getNTImageFileHeaderMachineType(WORD machineType);
-char* getNTImageCharacteristics(DWORD characteristics);
 void dissectNTImageCharacteristics(DWORD characteristics);
 
 #endif // PE_PARSER_CONSTS_H
