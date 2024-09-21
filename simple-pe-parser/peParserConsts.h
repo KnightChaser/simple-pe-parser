@@ -11,5 +11,8 @@
 
 char* getNTImageFileHeaderMachineType(WORD machineType);
 void dissectNTImageCharacteristics(DWORD characteristics);
+char* getNTImageOptionalHeaderOSVersion(DWORD majorVersion, DWORD minorVersion);
+char* getNTImageOptionalHeaderSubsystemDefinition(DWORD subsystem);
+char* dissectNTImageOptionalHeaderDLLCharacteristics(DWORD characteristics);
 
 #endif // PE_PARSER_CONSTS_H
