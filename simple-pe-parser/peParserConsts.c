@@ -207,3 +207,76 @@ char* getNTImageOptionalHeaderDataDirectoryName(DWORD dataDirectoryIndex) {
 			return "Unknown";
 	}
 }
+
+void dissectNTImageSectionHeaderCharacteristics(DWORD characteristics) {
+	if (characteristics & IMAGE_SCN_TYPE_NO_PAD)
+		printf("            - (0x%08X) Section should not be padded to the next boundary\n", IMAGE_SCN_TYPE_NO_PAD);
+	if (characteristics & IMAGE_SCN_CNT_CODE)
+		printf("            - (0x%08X) Section contains executable code\n", IMAGE_SCN_CNT_CODE);
+	if (characteristics & IMAGE_SCN_CNT_INITIALIZED_DATA)
+		printf("            - (0x%08X) Section contains initialized data\n", IMAGE_SCN_CNT_INITIALIZED_DATA);
+	if (characteristics & IMAGE_SCN_CNT_UNINITIALIZED_DATA)
+		printf("            - (0x%08X) Section contains uninitialized data\n", IMAGE_SCN_CNT_UNINITIALIZED_DATA);
+	if (characteristics & IMAGE_SCN_LNK_OTHER)
+		printf("            - (0x%08X) Reserved for future use\n", IMAGE_SCN_LNK_OTHER);
+	if (characteristics & IMAGE_SCN_LNK_INFO)
+		printf("            - (0x%08X) Section contains comments or some other type of information\n", IMAGE_SCN_LNK_INFO);
+	if (characteristics & IMAGE_SCN_LNK_REMOVE)
+		printf("            - (0x%08X) Section contents will not become part of image\n", IMAGE_SCN_LNK_REMOVE);
+	if (characteristics & IMAGE_SCN_LNK_COMDAT)
+		printf("            - (0x%08X) Section contents comdat\n", IMAGE_SCN_LNK_COMDAT);
+	if (characteristics & IMAGE_SCN_GPREL)
+		printf("            - (0x%08X) Section content can be accessed relative to GP\n", IMAGE_SCN_GPREL);
+	if (characteristics & IMAGE_SCN_MEM_PURGEABLE)
+		printf("            - (0x%08X) Reserved for future use\n", IMAGE_SCN_MEM_PURGEABLE);
+	if (characteristics & IMAGE_SCN_MEM_16BIT)
+		printf("            - (0x%08X) Reserved for future use\n", IMAGE_SCN_MEM_16BIT);
+	if (characteristics & IMAGE_SCN_MEM_LOCKED)
+		printf("            - (0x%08X) Reserved for future use\n", IMAGE_SCN_MEM_LOCKED);
+	if (characteristics & IMAGE_SCN_MEM_PRELOAD)
+		printf("            - (0x%08X) Reserved for future use\n", IMAGE_SCN_MEM_PRELOAD);
+	if (characteristics & IMAGE_SCN_ALIGN_1BYTES)
+		printf("            - (0x%08X) Align data on a 1-byte boundary\n", IMAGE_SCN_ALIGN_1BYTES);
+	if (characteristics & IMAGE_SCN_ALIGN_2BYTES)
+		printf("            - (0x%08X) Align data on a 2-byte boundary\n", IMAGE_SCN_ALIGN_2BYTES);
+	if (characteristics & IMAGE_SCN_ALIGN_4BYTES)
+		printf("            - (0x%08X) Align data on a 4-byte boundary\n", IMAGE_SCN_ALIGN_4BYTES);
+	if (characteristics & IMAGE_SCN_ALIGN_8BYTES)
+		printf("            - (0x%08X) Align data on a 8-byte boundary\n", IMAGE_SCN_ALIGN_8BYTES);
+	if (characteristics & IMAGE_SCN_ALIGN_16BYTES)
+		printf("            - (0x%08X) Align data on a 16-byte boundary\n", IMAGE_SCN_ALIGN_16BYTES);
+	if (characteristics & IMAGE_SCN_ALIGN_32BYTES)
+		printf("            - (0x%08X) Align data on a 32-byte boundary\n", IMAGE_SCN_ALIGN_32BYTES);
+	if (characteristics & IMAGE_SCN_ALIGN_64BYTES)
+		printf("            - (0x%08X) Align data on a 64-byte boundary\n", IMAGE_SCN_ALIGN_64BYTES);
+	if (characteristics & IMAGE_SCN_ALIGN_128BYTES)
+		printf("            - (0x%08X) Align data on a 128-byte boundary\n", IMAGE_SCN_ALIGN_128BYTES);
+	if (characteristics & IMAGE_SCN_ALIGN_256BYTES)
+		printf("            - (0x%08X) Align data on a 256-byte boundary\n", IMAGE_SCN_ALIGN_256BYTES);
+	if (characteristics & IMAGE_SCN_ALIGN_512BYTES)
+		printf("            - (0x%08X) Align data on a 512-byte boundary\n", IMAGE_SCN_ALIGN_512BYTES);
+	if (characteristics & IMAGE_SCN_ALIGN_1024BYTES)
+		printf("            - (0x%08X) Align data on a 1024-byte boundary\n", IMAGE_SCN_ALIGN_1024BYTES);
+	if (characteristics & IMAGE_SCN_ALIGN_2048BYTES)
+		printf("            - (0x%08X) Align data on a 2048-byte boundary\n", IMAGE_SCN_ALIGN_2048BYTES);
+	if (characteristics & IMAGE_SCN_ALIGN_4096BYTES)
+		printf("            - (0x%08X) Align data on a 4096-byte boundary\n", IMAGE_SCN_ALIGN_4096BYTES);
+	if (characteristics & IMAGE_SCN_ALIGN_8192BYTES)
+		printf("            - (0x%08X) Align data on a 8192-byte boundary\n", IMAGE_SCN_ALIGN_8192BYTES);
+	if (characteristics & IMAGE_SCN_LNK_NRELOC_OVFL)
+		printf("            - (0x%08X) Section contains extended relocations\n", IMAGE_SCN_LNK_NRELOC_OVFL);
+	if (characteristics & IMAGE_SCN_MEM_DISCARDABLE)
+		printf("            - (0x%08X) Section can be discarded\n", IMAGE_SCN_MEM_DISCARDABLE);
+	if (characteristics & IMAGE_SCN_MEM_NOT_CACHED)
+		printf("            - (0x%08X) Section is not cachable\n", IMAGE_SCN_MEM_NOT_CACHED);
+	if (characteristics & IMAGE_SCN_MEM_NOT_PAGED)
+		printf("            - (0x%08X) Section is not pageable\n", IMAGE_SCN_MEM_NOT_PAGED);
+	if (characteristics & IMAGE_SCN_MEM_SHARED)
+		printf("            - (0x%08X) Section is shareable\n", IMAGE_SCN_MEM_SHARED);
+	if (characteristics & IMAGE_SCN_MEM_EXECUTE)
+		printf("            - (0x%08X) Section is executable\n", IMAGE_SCN_MEM_EXECUTE);
+	if (characteristics & IMAGE_SCN_MEM_READ)
+		printf("            - (0x%08X) Section is readable\n", IMAGE_SCN_MEM_READ);
+	if (characteristics & IMAGE_SCN_MEM_WRITE)
+		printf("            - (0x%08X) Section is writeable\n", IMAGE_SCN_MEM_WRITE);
+}

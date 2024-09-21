@@ -15,5 +15,6 @@ char* getNTImageOptionalHeaderOSVersion(DWORD majorVersion, DWORD minorVersion);
 char* getNTImageOptionalHeaderSubsystemDefinition(DWORD subsystem);
 char* dissectNTImageOptionalHeaderDLLCharacteristics(DWORD characteristics);
 char* getNTImageOptionalHeaderDataDirectoryName(DWORD dataDirectoryIndex);
+void dissectNTImageSectionHeaderCharacteristics(DWORD characteristics);
 
 #endif // PE_PARSER_CONSTS_H

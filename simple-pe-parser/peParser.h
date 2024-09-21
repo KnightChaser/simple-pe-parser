@@ -16,4 +16,6 @@ void readNTFileHeader(LPVOID peFileData);
 void readNTFileOptionalHeader32(LPVOID peFileData);
 void readNTFileOptionalHeader64(LPVOID peFileData);
 void readNTFileDataDirectoryEntries(LPVOID peFileData);
+void readNTFileSectionHeaders(LPVOID peFileData);
+
 #endif // PE_PARSER_H

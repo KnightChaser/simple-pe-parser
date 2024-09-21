@@ -23,6 +23,7 @@ void parse(LPVOID peFileData) {
 	readDosHeader(peFileData);
 	readNTHeader(peFileData);
 	readNTFileDataDirectoryEntries(peFileData);
+	readNTFileSectionHeaders(peFileData);
 }
 
 void readDosHeader(LPVOID peFileData) {
@@ -177,4 +178,26 @@ void readNTFileDataDirectoryEntries(LPVOID peFileData) {
 																		peFileNtOptionalHeader->DataDirectory[i].Size);
 	}
 	printf("    +----------+-----------------------------------+---------------------+------------+\n");
+}
+
+void readNTFileSectionHeaders(LPVOID peFileData) {
+	PIMAGE_NT_HEADERS peFileNtHeader = (PIMAGE_NT_HEADERS)((BYTE*)peFileData + ((PIMAGE_DOS_HEADER)peFileData)->e_lfanew);
+	PIMAGE_SECTION_HEADER peFileSectionHeader = IMAGE_FIRST_SECTION(peFileNtHeader);
+
+	
+
+	printf("[~] SECTION HEADERS\n");
+	for (int i = 0; i < peFileNtHeader->FileHeader.NumberOfSections; i++) {
+		printf("    Section %d: %s\n", i + 1, peFileSectionHeader[i].Name);
+		printf("        Virtual Size:                      0x%08X\n", peFileSectionHeader[i].Misc.VirtualSize);
+		printf("        Virtual Address:                   0x%08X\n", peFileSectionHeader[i].VirtualAddress);
+		printf("        Size of Raw Data:                  0x%08X\n", peFileSectionHeader[i].SizeOfRawData);
+		printf("        Pointer to Raw Data:               0x%08X\n", peFileSectionHeader[i].PointerToRawData);
+		printf("        Pointer to Relocations:            0x%08X\n", peFileSectionHeader[i].PointerToRelocations);
+		printf("        Pointer to Line Numbers:           0x%08X\n", peFileSectionHeader[i].PointerToLinenumbers);
+		printf("        Number of Relocations:             0x%04X\n", peFileSectionHeader[i].NumberOfRelocations);
+		printf("        Number of Line Numbers:            0x%04X\n", peFileSectionHeader[i].NumberOfLinenumbers);
+		printf("        Characteristics:                   0x%08X\n", peFileSectionHeader[i].Characteristics);
+		dissectNTImageSectionHeaderCharacteristics(peFileSectionHeader[i].Characteristics);
+	}
 }
