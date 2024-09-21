@@ -56,7 +56,7 @@ void dissectNTImageCharacteristics(DWORD characteristics) {
 }
 
 char* getNTImageOptionalHeaderOSVersion(DWORD majorVersion, DWORD minorVersion) {
-	switch (majorVersion) {
+		switch (majorVersion) {
 		case 0x00:
 			switch (minorVersion) {
 				case 0x00:
@@ -112,7 +112,7 @@ char* getNTImageOptionalHeaderOSVersion(DWORD majorVersion, DWORD minorVersion) 
 }
 
 char* getNTImageOptionalHeaderSubsystemDefinition(DWORD subsystem) {
-	switch (subsystem) {
+		switch (subsystem) {
 		case IMAGE_SUBSYSTEM_UNKNOWN:
 			return "Unknown";
 		case IMAGE_SUBSYSTEM_NATIVE:
@@ -169,41 +169,4 @@ void dissectNTImageOptionalHeaderDLLCharacteristics(DWORD characteristics) {
 		printf("        - (0x%08X) A WDM driver\n", IMAGE_DLLCHARACTERISTICS_WDM_DRIVER);
 	if (characteristics & IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE)
 		printf("        - (0x%08X) Terminal Server aware\n", IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE);
-}
-
-char* getNTImageDirectoryEntryName(DWORD directoryIndex) {
-	switch (directoryIndex) {
-		case IMAGE_DIRECTORY_ENTRY_EXPORT:
-			return "Export Directory";
-		case IMAGE_DIRECTORY_ENTRY_IMPORT:
-			return "Import Directory";
-		case IMAGE_DIRECTORY_ENTRY_RESOURCE:
-			return "Resource Directory";
-		case IMAGE_DIRECTORY_ENTRY_EXCEPTION:
-			return "Exception Directory";
-		case IMAGE_DIRECTORY_ENTRY_SECURITY:
-			return "Security Directory";
-		case IMAGE_DIRECTORY_ENTRY_BASERELOC:
-			return "Base Relocation Table";
-		case IMAGE_DIRECTORY_ENTRY_DEBUG:
-			return "Debug Directory";
-		case IMAGE_DIRECTORY_ENTRY_ARCHITECTURE:
-			return "Architecture Specific Data";
-		case IMAGE_DIRECTORY_ENTRY_GLOBALPTR:
-			return "Global Pointer Register";
-		case IMAGE_DIRECTORY_ENTRY_TLS:
-			return "Thread Local Storage Directory";
-		case IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG:
-			return "Load Configuration Directory";
-		case IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT:
-			return "Bound Import Directory";
-		case IMAGE_DIRECTORY_ENTRY_IAT:
-			return "Import Address Table";
-		case IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT:
-			return "Delay Import Descriptor";
-		case IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR:
-			return "COM Descriptor Directory";
-		default:
-			return "Unknown";
-	}
 }
