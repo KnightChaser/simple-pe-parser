@@ -22,6 +22,7 @@ void parse(LPVOID peFileData) {
 	printf("[+] Parsing the PE file...\n");
 	readDosHeader(peFileData);
 	readNTHeader(peFileData);
+	readNTImageDirectoryEntries(peFileData);
 }
 
 void readDosHeader(LPVOID peFileData) {
@@ -160,4 +161,18 @@ void readNTFileOptionalHeader64(LPVOID peFileData) {
 	printf("    Size of heap commit:                   0x%016llX (-> %lld Bytes)\n", peFileNtOptionalHeader64->SizeOfHeapCommit, peFileNtOptionalHeader64->SizeOfHeapCommit);
 	printf("    Loader flags:                          0x%08X\n", peFileNtOptionalHeader64->LoaderFlags);
 	printf("    Number of RVA and sizes:               0x%08X\n", peFileNtOptionalHeader64->NumberOfRvaAndSizes);
+}
+
+void readNTImageDirectoryEntries(LPVOID peFileData) {
+	PIMAGE_NT_HEADERS peFileNtHeader = (PIMAGE_NT_HEADERS)((BYTE*)peFileData + ((PIMAGE_DOS_HEADER)peFileData)->e_lfanew);
+	PIMAGE_OPTIONAL_HEADER peFileNtOptionalHeader = &peFileNtHeader->OptionalHeader;
+
+	printf("[~] IMAGE DIRECTORY ENTRIES\n");
+	
+	printf("    +----------+--------------------------------+---------------------+------------+\n");
+	printf("    |   Index  |          section name          |   Virtual Address   |    Size    |\n");
+	printf("    +----------+--------------------------------+---------------------+------------+\n");
+	for (int i = 0; i < peFileNtOptionalHeader->NumberOfRvaAndSizes; i++)
+		printf("    |   0x%02X   | %30s |          0x%08X | 0x%08X |\n", i, getNTImageDirectoryEntryName(i), peFileNtOptionalHeader->DataDirectory[i].VirtualAddress, peFileNtOptionalHeader->DataDirectory[i].Size);
+	printf("    +----------+--------------------------------+---------------------+------------+\n");
 }
