@@ -1,5 +1,11 @@
+/**
+ * @file main.c
+ * @brief Main file for the simple PE parser
+ */
+
 #include <stdio.h>
 #include <Windows.h>
+#include "peParser.h"
 
 int main(int argc, char* argv[]) {
 	// TODO: Replace the filename with the path to the PE file you want to parse
@@ -42,6 +48,8 @@ int main(int argc, char* argv[]) {
         } else {
             printf("[+] Valid PE file.\n");
         }
+
+        parse(peFileData);
 
         // Free the allocated memory before exiting
         HeapFree(GetProcessHeap(), 0, peFileData);
