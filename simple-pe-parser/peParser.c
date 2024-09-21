@@ -152,10 +152,10 @@ void readNTFileOptionalHeader64(LPVOID peFileData) {
 	printf("    Checksum:                              0x%08X\n", peFileNtOptionalHeader64->CheckSum);
 	printf("    Subsystem:                             0x%04X\n", peFileNtOptionalHeader64->Subsystem);
 	printf("    Dll characteristics:                   0x%04X\n", peFileNtOptionalHeader64->DllCharacteristics);
-	printf("    Size of stack reserve:                 0x%016llX (-> %d Bytes)\n", peFileNtOptionalHeader64->SizeOfStackReserve, peFileNtOptionalHeader64->SizeOfStackReserve);
-	printf("    Size of stack commit:                  0x%016llX (-> %d Bytes)\n", peFileNtOptionalHeader64->SizeOfStackCommit, peFileNtOptionalHeader64->SizeOfStackCommit);
-	printf("    Size of heap reserve:                  0x%016llX (-> %d Bytes)\n", peFileNtOptionalHeader64->SizeOfHeapReserve, peFileNtOptionalHeader64->SizeOfHeapReserve);
-	printf("    Size of heap commit:                   0x%016llX (-> %d Bytes)\n", peFileNtOptionalHeader64->SizeOfHeapCommit, peFileNtOptionalHeader64->SizeOfHeapCommit);
+	printf("    Size of stack reserve:                 0x%016llX (-> %lld Bytes)\n", peFileNtOptionalHeader64->SizeOfStackReserve, peFileNtOptionalHeader64->SizeOfStackReserve);
+	printf("    Size of stack commit:                  0x%016llX (-> %lld Bytes)\n", peFileNtOptionalHeader64->SizeOfStackCommit, peFileNtOptionalHeader64->SizeOfStackCommit);
+	printf("    Size of heap reserve:                  0x%016llX (-> %lld Bytes)\n", peFileNtOptionalHeader64->SizeOfHeapReserve, peFileNtOptionalHeader64->SizeOfHeapReserve);
+	printf("    Size of heap commit:                   0x%016llX (-> %lld Bytes)\n", peFileNtOptionalHeader64->SizeOfHeapCommit, peFileNtOptionalHeader64->SizeOfHeapCommit);
 	printf("    Loader flags:                          0x%08X\n", peFileNtOptionalHeader64->LoaderFlags);
 	printf("    Number of RVA and sizes:               0x%08X\n", peFileNtOptionalHeader64->NumberOfRvaAndSizes);
 }
