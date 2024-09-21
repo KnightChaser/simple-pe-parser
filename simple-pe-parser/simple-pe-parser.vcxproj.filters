@@ -24,5 +24,19 @@
     <ClCompile Include="peParser.h">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="peParserConsts.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="peParserUtils.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="peParserConsts.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="peParserUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

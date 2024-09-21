@@ -54,7 +54,6 @@ int main(int argc, char* argv[]) {
         // Free the allocated memory before exiting
         HeapFree(GetProcessHeap(), 0, peFileData);
         CloseHandle(hFile);
-
 	}
 
 	return 0;

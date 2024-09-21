@@ -11,5 +11,7 @@
 
 void parse(LPVOID peFileData);
 void readDosHeader(LPVOID peFileData);
+void readNTHeader(LPVOID peFileData);
+void readNTFileHeader(LPVOID peFileData);
 
 #endif // PE_PARSER_H

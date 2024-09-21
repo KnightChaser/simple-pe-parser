@@ -20,8 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c" />
+    <ClCompile Include="peParserConsts.c" />
     <ClCompile Include="peParser.c" />
     <ClCompile Include="peParser.h" />
+    <ClCompile Include="peParserUtils.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="peParserConsts.h" />
+    <ClInclude Include="peParserUtils.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
