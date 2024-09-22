@@ -8,8 +8,12 @@
 #include "peParser.h"
 
 int main(int argc, char* argv[]) {
-	// TODO: Replace the filename with the path to the PE file you want to parse
-	const char* filename = "./simple-pe-parser.exe";
+	if (argc != 2) {
+		printf("Usage: %s <PE file>\n", argv[0]);
+		return 1;
+	}
+
+    const char* filename = argv[1];
 
 	HANDLE hFile = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE) {
