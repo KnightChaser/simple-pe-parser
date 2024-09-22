@@ -9,6 +9,14 @@
 #include "peParserConsts.h"
 #include "peParserUtils.h"
 
+ // ANSI escape codes for colors
+#define RESET   "\x1b[0m"
+#define RED     "\x1b[31m"
+#define GREEN   "\x1b[32m"
+#define YELLOW  "\x1b[33m"
+#define BLUE    "\x1b[34m"
+#define BOLD    "\x1b[1m"
+
 // Determine if the environment is 32-bit or 64-bit
 #if _WIN32 || _WIN64
 	#if _WIN64
@@ -28,7 +36,7 @@ void parse(LPVOID peFileData) {
 
 void readDosHeader(LPVOID peFileData) {
 	PIMAGE_DOS_HEADER peFileDosHeader = (PIMAGE_DOS_HEADER)peFileData;
-	printf("[~] DOS HEADER\n");
+	printf(BOLD "[~] DOS HEADER\n" RESET);
 	printf("    Magic number:                          0x%04X\n", peFileDosHeader->e_magic);
 	printf("    Bytes on the last page of the file:    0x%04X\n", peFileDosHeader->e_cblp);
 	printf("    Pages in the file:                     0x%04X\n", peFileDosHeader->e_cp);
@@ -58,21 +66,21 @@ void readNTHeader(LPVOID peFileData) {
 	 WORD magicNumber = (WORD)peFileNtHeader->OptionalHeader.Magic;
 	 switch (magicNumber) {
 		 case IMAGE_NT_OPTIONAL_HDR32_MAGIC:
-			 printf("[~] NT HEADER (32-bit / Signature: 0x%08X)\n", peFileNtHeader->Signature);
-			 printf("    --- File Header ---\n");
+			 printf(BOLD "[~] NT HEADER (32-bit / Signature: 0x%08X)\n" RESET, peFileNtHeader->Signature);
+			 printf(BOLD "    --- File Header ---\n" RESET);
 			 readNTFileHeader(peFileData);
-			 printf("    --- Optional Header ---\n");
+			 printf(BOLD "    --- Optional Header ---\n" RESET);
 			 readNTFileOptionalHeader32(peFileData);
 			 break;
 		 case IMAGE_NT_OPTIONAL_HDR64_MAGIC:
-			 printf("[~] NT HEADER (64-bit / Signature: 0x%08X)\n", peFileNtHeader->Signature);
-			 printf("    --- File Header ---\n");
+			 printf(BOLD "[~] NT HEADER (64-bit / Signature: 0x%08X)\n" RESET, peFileNtHeader->Signature);
+			 printf(BOLD "    --- File Header ---\n" RESET);
 			 readNTFileHeader(peFileData);
-			 printf("    --- Optional Header ---\n");
+			 printf(BOLD "    --- Optional Header ---\n" RESET);
 			 readNTFileOptionalHeader64(peFileData);
 			 break;
 		 default:
-			 printf("[!] Invalid magic number: %04X\n", magicNumber);
+			 printf(BOLD RED "[!] Invalid magic number: %04X\n" RESET, magicNumber);
 			 exit(1);
 			 return;
 	 }
@@ -129,7 +137,7 @@ void readNTFileOptionalHeader32(LPVOID peFileData) {
 }
 
 void readNTFileOptionalHeader64(LPVOID peFileData) {
-		PIMAGE_NT_HEADERS peFileNtHeader = (PIMAGE_NT_HEADERS)((BYTE*)peFileData + ((PIMAGE_DOS_HEADER)peFileData)->e_lfanew);
+	PIMAGE_NT_HEADERS peFileNtHeader = (PIMAGE_NT_HEADERS)((BYTE*)peFileData + ((PIMAGE_DOS_HEADER)peFileData)->e_lfanew);
 	PIMAGE_OPTIONAL_HEADER64 peFileNtOptionalHeader64 = &peFileNtHeader->OptionalHeader;
 
 	printf("    Magic:                                 0x%04X (PE32+)\n", peFileNtOptionalHeader64->Magic);
@@ -168,7 +176,7 @@ void readNTFileDataDirectoryEntries(LPVOID peFileData) {
 	PIMAGE_NT_HEADERS peFileNtHeader = (PIMAGE_NT_HEADERS)((BYTE*)peFileData + ((PIMAGE_DOS_HEADER)peFileData)->e_lfanew);
 	PIMAGE_OPTIONAL_HEADER peFileNtOptionalHeader = &peFileNtHeader->OptionalHeader;
 
-	printf("[~] DATA DIRECTORY ENTRIES\n");
+	printf(BOLD "[~] DATA DIRECTORY ENTRIES\n" RESET);
 	printf("    +----------+-----------------------------------+---------------------+------------+\n");
 	printf("    |  Index   |          Directory Name           |   Virtual Address   |    Size    |\n");
 	printf("    +----------+-----------------------------------+---------------------+------------+\n");
@@ -186,7 +194,7 @@ void readNTFileSectionHeaders(LPVOID peFileData) {
 
 	
 
-	printf("[~] SECTION HEADERS\n");
+	printf(BOLD "[~] SECTION HEADERS\n" RESET);
 	for (int i = 0; i < peFileNtHeader->FileHeader.NumberOfSections; i++) {
 		printf("    Section %d: %s\n", i + 1, peFileSectionHeader[i].Name);
 		printf("        Virtual Size:                      0x%08X\n", peFileSectionHeader[i].Misc.VirtualSize);
