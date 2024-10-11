@@ -181,9 +181,9 @@ void readNTFileDataDirectoryEntries(LPVOID peFileData) {
 	printf("    |  Index   |          Directory Name           |   Virtual Address   |    Size    |\n");
 	printf("    +----------+-----------------------------------+---------------------+------------+\n");
 	for (int i = 0; i < peFileNtOptionalHeader->NumberOfRvaAndSizes; i++) {
-		printf("    |    %02d    | %33s |  0x%016llX | 0x%08X |\n", i, getNTImageOptionalHeaderDataDirectoryName(i), 
-																		peFileNtOptionalHeader->DataDirectory[i].VirtualAddress, 
-																		peFileNtOptionalHeader->DataDirectory[i].Size);
+        printf("    |    %02d    | %33s |  0x%016llX | 0x%08llX |\n", i, getNTImageOptionalHeaderDataDirectoryName(i), 
+																							(unsigned long long)peFileNtOptionalHeader->DataDirectory[i].VirtualAddress, 
+																							(unsigned long long)peFileNtOptionalHeader->DataDirectory[i].Size);
 	}
 	printf("    +----------+-----------------------------------+---------------------+------------+\n");
 }
