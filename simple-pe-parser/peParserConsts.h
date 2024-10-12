@@ -16,5 +16,6 @@ char* getNTImageOptionalHeaderSubsystemDefinition(DWORD subsystem);
 char* dissectNTImageOptionalHeaderDLLCharacteristics(DWORD characteristics);
 char* getNTImageOptionalHeaderDataDirectoryName(DWORD dataDirectoryIndex);
 void dissectNTImageSectionHeaderCharacteristics(DWORD characteristics);
+char* getNTImageRelocationType(WORD type);
 
 #endif // PE_PARSER_CONSTS_H

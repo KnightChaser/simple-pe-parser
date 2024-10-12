@@ -33,6 +33,7 @@ void parse(LPVOID peFileData) {
 	readNTFileDataDirectoryEntries(peFileData);
 	readNTFileSectionHeaders(peFileData);
 	readNTImportAddressTable(peFileData);
+	readRelocationTable(peFileData);
 }
 
 void readDosHeader(LPVOID peFileData) {
@@ -270,4 +271,50 @@ void readNTImportAddressTable(LPVOID peFileData) {
 
 	// Print table footer
 	printf("    +--------------------------------------------------------------+----------------------+----------------------+\n");
+}
+
+void readRelocationTable(LPVOID peFileData) {
+	// Get NT headers
+	PIMAGE_NT_HEADERS peFileNtHeader = (PIMAGE_NT_HEADERS)((BYTE*)peFileData + ((PIMAGE_DOS_HEADER)peFileData)->e_lfanew);
+	PIMAGE_OPTIONAL_HEADER peFileNtOptionalHeader = &peFileNtHeader->OptionalHeader;
+	PIMAGE_DATA_DIRECTORY relocationDirectory = &peFileNtOptionalHeader->DataDirectory[IMAGE_DIRECTORY_ENTRY_BASERELOC];
+
+	if (!relocationDirectory->VirtualAddress || !relocationDirectory->Size) {
+		printf("No Relocation Table found.\n");
+		return;
+	}
+
+	printf(BOLD "[~] RELOCATION TABLE\n" RESET);
+
+	// Convert RVA to file offset
+	DWORD relocationTableOffset = rvaToFileOffset(peFileNtHeader, relocationDirectory->VirtualAddress);
+	PIMAGE_BASE_RELOCATION baseRelocation = (PIMAGE_BASE_RELOCATION)((BYTE*)peFileData + relocationTableOffset);
+
+	// Print table header
+	printf("    +--------------------------------------+----------------------+\n");
+	printf("    |            Page RVA                  |       Block Size     |\n");
+	printf("    +--------------------------------------+----------------------+\n");
+
+	// Iterate over the relocation blocks
+	while (baseRelocation->VirtualAddress != 0) {
+		printf("    |  0x%08X                          |  0x%08X          |\n", baseRelocation->VirtualAddress, baseRelocation->SizeOfBlock);
+
+		// Calculate the number of entries in this block
+		DWORD numRelocations = (baseRelocation->SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)) / sizeof(WORD);
+		WORD* relocations = (WORD*)((BYTE*)baseRelocation + sizeof(IMAGE_BASE_RELOCATION));
+
+		// Iterate over each relocation entry
+		for (DWORD index = 0; index < numRelocations; index++) {
+			WORD relocEntry = relocations[index];
+			DWORD offset = relocEntry & 0xFFF;    // Lower 12 bits = offset (The lower 12 bits specify the offset from the base address where the relocation should be applied.)
+			WORD type = (relocEntry >> 12) & 0xF; // Upper 4 bits = type    (The upper 4 bits specify the type of relocation.)
+
+			printf("    |     - Offset: 0x%03X, Type: %-8s  |                      |\n", offset, getNTImageRelocationType(type));
+		}
+
+		// Move to the next relocation block
+		baseRelocation = (PIMAGE_BASE_RELOCATION)((BYTE*)baseRelocation + baseRelocation->SizeOfBlock);
+	}
+
+	printf("    +--------------------------------------+----------------------+\n");
 }

@@ -280,3 +280,26 @@ void dissectNTImageSectionHeaderCharacteristics(DWORD characteristics) {
 	if (characteristics & IMAGE_SCN_MEM_WRITE)
 		printf("            - (0x%08X) Section is writeable\n", IMAGE_SCN_MEM_WRITE);
 }
+
+char* getNTImageRelocationType(WORD type) {
+	switch (type) {
+	case IMAGE_REL_BASED_ABSOLUTE:
+		return "ABSOLUTE";
+	case IMAGE_REL_BASED_HIGH:
+		return "HIGH";
+	case IMAGE_REL_BASED_LOW:
+		return "LOW";
+	case IMAGE_REL_BASED_HIGHLOW:
+		return "HIGHLOW";
+	case IMAGE_REL_BASED_HIGHADJ:
+		return "HIGHADJ";
+	case IMAGE_REL_BASED_MIPS_JMPADDR:
+		return "MIPS_JMPADDR";
+	case IMAGE_REL_BASED_MIPS_JMPADDR16:
+		return "MIPS_JMPADDR16";
+	case IMAGE_REL_BASED_DIR64:
+		return "DIR64";
+	default:
+		return "Unknown";
+	}
+}
