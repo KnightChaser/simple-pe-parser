@@ -10,5 +10,6 @@
 #include <windows.h>
 
 char* convertUnixTimeToHumanReadable(DWORD unixTime);
+DWORD rvaToFileOffset(PIMAGE_NT_HEADERS ntHeader, DWORD rva);
 
 #endif // PE_PARSER_UTILS_H

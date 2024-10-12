@@ -32,6 +32,7 @@ void parse(LPVOID peFileData) {
 	readNTHeader(peFileData);
 	readNTFileDataDirectoryEntries(peFileData);
 	readNTFileSectionHeaders(peFileData);
+	readNTImportAddressTable(peFileData);
 }
 
 void readDosHeader(LPVOID peFileData) {
@@ -208,4 +209,65 @@ void readNTFileSectionHeaders(LPVOID peFileData) {
 		printf("        Characteristics:                   0x%08X\n", peFileSectionHeader[i].Characteristics);
 		dissectNTImageSectionHeaderCharacteristics(peFileSectionHeader[i].Characteristics);
 	}
+}
+
+void readNTImportAddressTable(LPVOID peFileData) {
+	// Get NT headers
+	PIMAGE_NT_HEADERS peFileNtHeader = (PIMAGE_NT_HEADERS)((BYTE*)peFileData + ((PIMAGE_DOS_HEADER)peFileData)->e_lfanew);
+	PIMAGE_OPTIONAL_HEADER peFileNtOptionalHeader = &peFileNtHeader->OptionalHeader;
+	PIMAGE_DATA_DIRECTORY importDirectory = &peFileNtOptionalHeader->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
+
+	if (!importDirectory->VirtualAddress || !importDirectory->Size) {
+		printf("No Import Address Table found.\n");
+		return;
+	}
+
+	printf(BOLD "[~] IMPORT ADDRESS TABLE(IAT)\n" RESET);
+
+	// Print table header
+	printf("    +--------------------------------------------------------------+----------------------+----------------------+\n");
+	printf("    |                          DLL Name                            |  First Thunk (RVA)   | Original First Thunk |\n");
+	printf("    +--------------------------------------------------------------+----------------------+----------------------+\n");
+
+	// Convert Import Directory RVA to file offset
+	DWORD importDescriptorOffset = rvaToFileOffset(peFileNtHeader, importDirectory->VirtualAddress);
+	PIMAGE_IMPORT_DESCRIPTOR importDescriptor = (PIMAGE_IMPORT_DESCRIPTOR)((BYTE*)peFileData + importDescriptorOffset);
+
+	// Iterate through the Import Descriptors until we reach the end(first thunk is NULL)
+	while (importDescriptor->Name != 0) {
+		// Get DLL name, boundness, and first thunk value
+		DWORD nameOffset = rvaToFileOffset(peFileNtHeader, importDescriptor->Name);
+		char* dllName = (char*)((BYTE*)peFileData + nameOffset);
+		BOOL isBound = importDescriptor->TimeDateStamp != 0;
+		DWORD firstThunkOffset = rvaToFileOffset(peFileNtHeader, importDescriptor->FirstThunk);
+		DWORD originalFirstThunkOffset = rvaToFileOffset(peFileNtHeader, importDescriptor->OriginalFirstThunk);
+
+		// Print DLL entry in table
+		printf("    | %-60s |  0x%08X          |  0x%08X          |\n", dllName, firstThunkOffset, originalFirstThunkOffset);
+
+		// Get the Import Address Table (FirstThunk)
+		DWORD thunkOffset = rvaToFileOffset(peFileNtHeader, importDescriptor->FirstThunk);
+		PIMAGE_THUNK_DATA thunk = (PIMAGE_THUNK_DATA)((BYTE*)peFileData + thunkOffset);
+
+		// Iterate over the Thunks (functions being imported)
+		while (thunk->u1.AddressOfData != 0) {
+			if (thunk->u1.Ordinal & IMAGE_ORDINAL_FLAG) {
+				// Import by ordinal
+				printf("    | - Ordinal: %-31lld |                      |                      |\n", (long long)IMAGE_ORDINAL(thunk->u1.Ordinal));
+			}
+			else {
+				// Import by name
+				DWORD functionNameOffset = rvaToFileOffset(peFileNtHeader, thunk->u1.AddressOfData);
+				PIMAGE_IMPORT_BY_NAME importByName = (PIMAGE_IMPORT_BY_NAME)((BYTE*)peFileData + functionNameOffset);
+				const char* functionName = (const char*)importByName->Name;
+				const WORD* hint = (const WORD*)&importByName->Hint;
+				printf("    | - Function: %-31s (Hint: %08d) |                      |                      |\n", functionName, *hint);
+			}
+			thunk++;
+		}
+		importDescriptor++;
+	}
+
+	// Print table footer
+	printf("    +--------------------------------------------------------------+----------------------+----------------------+\n");
 }
