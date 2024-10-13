@@ -29,6 +29,9 @@
     <ClInclude Include="peParserConsts.h" />
     <ClInclude Include="peParserUtils.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="compIdList.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

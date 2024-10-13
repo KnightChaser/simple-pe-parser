@@ -11,6 +11,7 @@
 
 void parse(LPVOID peFileData);
 void readDosHeader(LPVOID peFileData);
+void readRichHeader(LPVOID peFileData);
 void readNTHeader(LPVOID peFileData);
 void readNTFileHeader(LPVOID peFileData);
 void readNTFileOptionalHeader32(LPVOID peFileData);

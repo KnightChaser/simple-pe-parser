@@ -9,7 +9,7 @@
 #include "peParserConsts.h"
 #include "peParserUtils.h"
 
- // ANSI escape codes for colors
+// ANSI escape codes for colors
 #define RESET   "\x1b[0m"
 #define RED     "\x1b[31m"
 #define GREEN   "\x1b[32m"
@@ -29,6 +29,7 @@
 void parse(LPVOID peFileData) {
 	printf("[+] Parsing the PE file...\n");
 	readDosHeader(peFileData);
+	readRichHeader(peFileData);
 	readNTHeader(peFileData);
 	readNTFileDataDirectoryEntries(peFileData);
 	readNTFileSectionHeaders(peFileData);
@@ -60,6 +61,69 @@ void readDosHeader(LPVOID peFileData) {
 #else
 	printf("    File address of new exe header:        0x%08X\n", peFileDosHeader->e_lfanew);				// 64-bit (long)
 #endif
+}
+
+void readRichHeader(LPVOID peFileData) {
+	// The Rich header is located after the DOS stub, before the NT headers
+	PIMAGE_DOS_HEADER dosHeader = (PIMAGE_DOS_HEADER)peFileData;
+	DWORD peOffset = dosHeader->e_lfanew;
+
+	// Search for the Rich signature
+	DWORD richOffset = 0;
+	for (DWORD byteCount = 0x40; byteCount < peOffset; byteCount += 4) {
+		if (readDwordFromMemory(peFileData, byteCount) == 0x68636952) { // "Rich" in ASCII
+			richOffset = byteCount + 4;									// The XOR key is immediately after the "Rich" signature
+			break;
+		}
+	}
+
+	if (!richOffset) {
+		printf("[!] Rich header not found.\n");
+		return;
+	}
+
+	DWORD xorKey = readDwordFromMemory(peFileData, richOffset);
+	DWORD dansOffset = 0;
+	for (DWORD byteCount = 0x40; byteCount < richOffset; byteCount += 4) {
+		if ((readDwordFromMemory(peFileData, byteCount) ^ xorKey) == 0x536E6144) {	// "DanS" in ASCII
+			dansOffset = byteCount;
+			break;
+		}
+	}
+
+	if (!dansOffset) {
+		printf("[!] DanS signature not found.\n");
+		return;
+	}
+
+	// Now, the rich header has been found.
+	// The Rich header is a series of 4-byte values, each representing a build number.
+	// Malicious software may use the Rich header to store encrypted data or other information(such as nicknames of the developers).
+	printf(BOLD GREEN "[+] Rich header has been found!\n" RESET);
+	printf(BOLD "[~] RICH HEADER\n" RESET);
+	printf("    XOR Key:                               0x%08X\n", xorKey);
+
+	// Decode the Rich header using the XOR key
+	DWORD currentPosition = dansOffset + 16;
+	DWORD endPosition = richOffset - 8;
+	
+	printf("    @comp.id|      id|   version|count\n");
+	printf("    --------+--------+----------+-----\n");
+	while (currentPosition < endPosition) {
+		// Decode the version and ID using the pre-obtained XOR key
+		// Decode version and ID using the XOR key
+		DWORD compId = readDwordFromMemory(peFileData, currentPosition) ^ xorKey;
+		WORD id = (compId >> 16) & 0xFFFF;
+		WORD version = compId & 0xFFFF;
+		currentPosition += 4;
+
+		// Decode count using the XOR key
+		DWORD count = readDwordFromMemory(peFileData, currentPosition) ^ xorKey;
+		currentPosition += 4;
+
+		const char* compIdTranslation = getCompIdTranslation(compId);
+		printf("    %08X|    %04X|    %6u|%5u (-> %s)\n", compId, id, version, count, compIdTranslation);
+	}
 }
 
 void readNTHeader(LPVOID peFileData) {

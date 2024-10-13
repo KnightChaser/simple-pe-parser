@@ -4,7 +4,11 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <Windows.h>
+
+#define MAX_PATH_LENGTH 4096
 
 char* getNTImageFileHeaderMachineType(WORD machineType) {
 	switch (machineType) {
@@ -302,4 +306,63 @@ char* getNTImageRelocationType(WORD type) {
 	default:
 		return "Unknown";
 	}
+}
+
+char* getCompIdTranslation(DWORD compId) {
+	// Define the buffer for the file path
+	char compIdListPath[MAX_PATH_LENGTH];
+	DWORD pathLength = GetCurrentDirectoryA(MAX_PATH_LENGTH, compIdListPath);
+	if (pathLength == 0 || pathLength > MAX_PATH_LENGTH - 20) {
+		printf("[!] Failed to get the current directory or path is too long.\n");
+		exit(-1);
+	}
+
+	// Modify the compIdListPath's last two directories to point to the compIdList.txt file like so:
+	// Before: ...\simple-pe-parser\x64\Debug\
+	// After : ...\simple-pe-parser\simple-pe-parser\ 
+	compIdListPath[pathLength - 9] = '\0';
+	strncat_s(compIdListPath, MAX_PATH_LENGTH, "simple-pe-parser", _TRUNCATE);
+
+	// Append the "compIdList.txt" file name to the directory path
+	strncat_s(compIdListPath, MAX_PATH_LENGTH, "\\compIdList.txt", _TRUNCATE);
+
+	// Open the compIdList.txt file
+	FILE* file = fopen(compIdListPath, "r");
+	if (!file) {
+		printf("[!] Failed to open %s\n", compIdListPath);
+		return NULL;
+	}
+
+	static char translation[256];  // Buffer to hold the translation text
+	char line[512];  // Buffer to hold each line read from the file
+
+	// Read the file line by line to check for the compId
+	while (fgets(line, sizeof(line), file)) {
+		// Skip lines that are comments or empty
+		if (line[0] == '#' || line[0] == '\n') {
+			continue;
+		}
+
+		DWORD fileCompId;
+		char compIdDescription[256];
+
+		// Parse the line to extract @comp.id and the description
+		if (sscanf_s(line, "%08x %[^\n]", &fileCompId, compIdDescription, (unsigned int)sizeof(compIdDescription)) == 2) {
+			// Compare the @comp.id with the input compId
+			if (fileCompId == compId) {
+				// Copy the description into the translation buffer
+				ZeroMemory(translation, sizeof(translation));
+				strncpy_s(translation, sizeof(translation), compIdDescription, sizeof(translation) - 1);
+				translation[sizeof(translation) - 1] = '\0';
+				fclose(file);
+				return translation;  // Return the translation if found
+			}
+		}
+	}
+
+	// If we reach here, no matching compId was found
+	fclose(file);
+
+	// Return a default message (Unknown)
+	return "Unknown";
 }

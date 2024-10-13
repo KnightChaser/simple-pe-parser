@@ -35,3 +35,8 @@ DWORD rvaToFileOffset(PIMAGE_NT_HEADERS ntHeader, DWORD rva) {
 	// This might indicate a malformed PE file or an incorrect assumption
 	return rva;
 }
+
+// Read DWORD(Double Word) from memory(LPVOID peFileData) at the specified offset
+DWORD readDwordFromMemory(LPVOID peFileData, DWORD offset) {
+	return *(DWORD*)((BYTE*)peFileData + offset);
+}
