@@ -247,10 +247,10 @@ void readNTFileDataDirectoryEntries(LPVOID peFileData) {
 	printf("    +----------+-----------------------------------+---------------------+------------+\n");
 	printf("    |  Index   |          Directory Name           |   Virtual Address   |    Size    |\n");
 	printf("    +----------+-----------------------------------+---------------------+------------+\n");
-	for (int i = 0; i < peFileNtOptionalHeader->NumberOfRvaAndSizes; i++) {
-		printf("    |    %02d    | %33s |  0x%016llX | 0x%08llX |\n", i, getNTImageOptionalHeaderDataDirectoryName(i),
-			(unsigned long long)peFileNtOptionalHeader->DataDirectory[i].VirtualAddress,
-			(unsigned long long)peFileNtOptionalHeader->DataDirectory[i].Size);
+	for (DWORD index = 0; index < peFileNtOptionalHeader->NumberOfRvaAndSizes; index++) {
+		printf("    |    %02d    | %33s |  0x%016llX | 0x%08llX |\n", index, getNTImageOptionalHeaderDataDirectoryName(index),
+			(unsigned long long)peFileNtOptionalHeader->DataDirectory[index].VirtualAddress,
+			(unsigned long long)peFileNtOptionalHeader->DataDirectory[index].Size);
 	}
 	printf("    +----------+-----------------------------------+---------------------+------------+\n");
 }
@@ -380,7 +380,7 @@ void readNTExportDirectory(LPVOID peFileData) {
 		char* functionName = (char*)((BYTE*)peFileData + functionNameOffset);
 
 		// Get the function's ordinal (index in the Export Address Table)
-		WORD ordinal = ordinals[index] + exportDirectoryData->Base;		// Base is the starting ordinal
+		DWORD ordinal = ordinals[index] + exportDirectoryData->Base;	// Base is the starting ordinal
 		DWORD functionRVA = functionsRVA[ordinals[index]];				// The address of the function is at the same index as the ordinal in the EAT(AddressOfFunctions)
 
 		printf("	Function Name:          %s\n", functionName);
