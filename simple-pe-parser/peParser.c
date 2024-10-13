@@ -19,11 +19,11 @@
 
 // Determine if the environment is 32-bit or 64-bit
 #if _WIN32 || _WIN64
-	#if _WIN64
-		#define ENV64BIT
-	#else
-		#define ENV32BIT
-	#endif
+#if _WIN64
+#define ENV64BIT
+#else
+#define ENV32BIT
+#endif
 #endif
 
 void parse(LPVOID peFileData) {
@@ -63,30 +63,30 @@ void readDosHeader(LPVOID peFileData) {
 }
 
 void readNTHeader(LPVOID peFileData) {
-	 PIMAGE_NT_HEADERS peFileNtHeader = (PIMAGE_NT_HEADERS)((BYTE*)peFileData + ((PIMAGE_DOS_HEADER)peFileData)->e_lfanew);
+	PIMAGE_NT_HEADERS peFileNtHeader = (PIMAGE_NT_HEADERS)((BYTE*)peFileData + ((PIMAGE_DOS_HEADER)peFileData)->e_lfanew);
 
-	 // Check if the given NT header is 32-bit or 64-bit
-	 WORD magicNumber = (WORD)peFileNtHeader->OptionalHeader.Magic;
-	 switch (magicNumber) {
-		 case IMAGE_NT_OPTIONAL_HDR32_MAGIC:
-			 printf(BOLD "[~] NT HEADER (32-bit / Signature: 0x%08X)\n" RESET, peFileNtHeader->Signature);
-			 printf(BOLD "    --- File Header ---\n" RESET);
-			 readNTFileHeader(peFileData);
-			 printf(BOLD "    --- Optional Header ---\n" RESET);
-			 readNTFileOptionalHeader32(peFileData);
-			 break;
-		 case IMAGE_NT_OPTIONAL_HDR64_MAGIC:
-			 printf(BOLD "[~] NT HEADER (64-bit / Signature: 0x%08X)\n" RESET, peFileNtHeader->Signature);
-			 printf(BOLD "    --- File Header ---\n" RESET);
-			 readNTFileHeader(peFileData);
-			 printf(BOLD "    --- Optional Header ---\n" RESET);
-			 readNTFileOptionalHeader64(peFileData);
-			 break;
-		 default:
-			 printf(BOLD RED "[!] Invalid magic number: %04X\n" RESET, magicNumber);
-			 exit(1);
-			 return;
-	 }
+	// Check if the given NT header is 32-bit or 64-bit
+	WORD magicNumber = (WORD)peFileNtHeader->OptionalHeader.Magic;
+	switch (magicNumber) {
+	case IMAGE_NT_OPTIONAL_HDR32_MAGIC:
+		printf(BOLD "[~] NT HEADER (32-bit / Signature: 0x%08X)\n" RESET, peFileNtHeader->Signature);
+		printf(BOLD "    --- File Header ---\n" RESET);
+		readNTFileHeader(peFileData);
+		printf(BOLD "    --- Optional Header ---\n" RESET);
+		readNTFileOptionalHeader32(peFileData);
+		break;
+	case IMAGE_NT_OPTIONAL_HDR64_MAGIC:
+		printf(BOLD "[~] NT HEADER (64-bit / Signature: 0x%08X)\n" RESET, peFileNtHeader->Signature);
+		printf(BOLD "    --- File Header ---\n" RESET);
+		readNTFileHeader(peFileData);
+		printf(BOLD "    --- Optional Header ---\n" RESET);
+		readNTFileOptionalHeader64(peFileData);
+		break;
+	default:
+		printf(BOLD RED "[!] Invalid magic number: %04X\n" RESET, magicNumber);
+		exit(1);
+		return;
+	}
 }
 
 void readNTFileHeader(LPVOID peFileData) {
@@ -184,9 +184,9 @@ void readNTFileDataDirectoryEntries(LPVOID peFileData) {
 	printf("    |  Index   |          Directory Name           |   Virtual Address   |    Size    |\n");
 	printf("    +----------+-----------------------------------+---------------------+------------+\n");
 	for (int i = 0; i < peFileNtOptionalHeader->NumberOfRvaAndSizes; i++) {
-        printf("    |    %02d    | %33s |  0x%016llX | 0x%08llX |\n", i, getNTImageOptionalHeaderDataDirectoryName(i), 
-																							(unsigned long long)peFileNtOptionalHeader->DataDirectory[i].VirtualAddress, 
-																							(unsigned long long)peFileNtOptionalHeader->DataDirectory[i].Size);
+		printf("    |    %02d    | %33s |  0x%016llX | 0x%08llX |\n", i, getNTImageOptionalHeaderDataDirectoryName(i),
+			(unsigned long long)peFileNtOptionalHeader->DataDirectory[i].VirtualAddress,
+			(unsigned long long)peFileNtOptionalHeader->DataDirectory[i].Size);
 	}
 	printf("    +----------+-----------------------------------+---------------------+------------+\n");
 }
@@ -194,8 +194,6 @@ void readNTFileDataDirectoryEntries(LPVOID peFileData) {
 void readNTFileSectionHeaders(LPVOID peFileData) {
 	PIMAGE_NT_HEADERS peFileNtHeader = (PIMAGE_NT_HEADERS)((BYTE*)peFileData + ((PIMAGE_DOS_HEADER)peFileData)->e_lfanew);
 	PIMAGE_SECTION_HEADER peFileSectionHeader = IMAGE_FIRST_SECTION(peFileNtHeader);
-
-	
 
 	printf(BOLD "[~] SECTION HEADERS\n" RESET);
 	for (int i = 0; i < peFileNtHeader->FileHeader.NumberOfSections; i++) {
@@ -224,12 +222,7 @@ void readNTImportAddressTable(LPVOID peFileData) {
 		return;
 	}
 
-	printf(BOLD "[~] IMPORT ADDRESS TABLE(IAT)\n" RESET);
-
-	// Print table header
-	printf("    +--------------------------------------------------------------+----------------------+----------------------+\n");
-	printf("    |                          DLL Name                            |  First Thunk (RVA)   | Original First Thunk |\n");
-	printf("    +--------------------------------------------------------------+----------------------+----------------------+\n");
+	printf(BOLD "[~] IMPORT ADDRESS TABLE (IAT)\n" RESET);
 
 	// Convert Import Directory RVA to file offset
 	DWORD importDescriptorOffset = rvaToFileOffset(peFileNtHeader, importDirectory->VirtualAddress);
@@ -237,25 +230,27 @@ void readNTImportAddressTable(LPVOID peFileData) {
 
 	// Iterate through the Import Descriptors until we reach the end(first thunk is NULL)
 	while (importDescriptor->Name != 0) {
-		// Get DLL name, boundness, and first thunk value
+		// Get DLL name and addresses
 		DWORD nameOffset = rvaToFileOffset(peFileNtHeader, importDescriptor->Name);
 		char* dllName = (char*)((BYTE*)peFileData + nameOffset);
-		BOOL isBound = importDescriptor->TimeDateStamp != 0;
 		DWORD firstThunkOffset = rvaToFileOffset(peFileNtHeader, importDescriptor->FirstThunk);
 		DWORD originalFirstThunkOffset = rvaToFileOffset(peFileNtHeader, importDescriptor->OriginalFirstThunk);
 
-		// Print DLL entry in table
-		printf("    | %-60s |  0x%08X          |  0x%08X          |\n", dllName, firstThunkOffset, originalFirstThunkOffset);
+		// Print DLL information
+		printf("    DLL Name:                %s\n", dllName);
+		printf("        First Thunk (RVA):        0x%08X\n", firstThunkOffset);
+		printf("        Original First Thunk:     0x%08X\n", originalFirstThunkOffset);
 
 		// Get the Import Address Table (FirstThunk)
 		DWORD thunkOffset = rvaToFileOffset(peFileNtHeader, importDescriptor->FirstThunk);
 		PIMAGE_THUNK_DATA thunk = (PIMAGE_THUNK_DATA)((BYTE*)peFileData + thunkOffset);
 
 		// Iterate over the Thunks (functions being imported)
+		printf("        Imported Functions:\n");
 		while (thunk->u1.AddressOfData != 0) {
 			if (thunk->u1.Ordinal & IMAGE_ORDINAL_FLAG) {
 				// Import by ordinal
-				printf("    | - Ordinal: %-31lld |                      |                      |\n", (long long)IMAGE_ORDINAL(thunk->u1.Ordinal));
+				printf("            - Ordinal: %lld\n", (long long)IMAGE_ORDINAL(thunk->u1.Ordinal));
 			}
 			else {
 				// Import by name
@@ -263,15 +258,13 @@ void readNTImportAddressTable(LPVOID peFileData) {
 				PIMAGE_IMPORT_BY_NAME importByName = (PIMAGE_IMPORT_BY_NAME)((BYTE*)peFileData + functionNameOffset);
 				const char* functionName = (const char*)importByName->Name;
 				const WORD* hint = (const WORD*)&importByName->Hint;
-				printf("    | - Function: %-31s (Hint: %08d) |                      |                      |\n", functionName, *hint);
+				printf("            - Function: %s (Hint: %d)\n", functionName, *hint);
 			}
 			thunk++;
 		}
+		printf("    ---------------------------------------------------------------\n");
 		importDescriptor++;
 	}
-
-	// Print table footer
-	printf("    +--------------------------------------------------------------+----------------------+----------------------+\n");
 }
 
 void readNTExportDirectory(LPVOID peFileData) {
@@ -305,15 +298,13 @@ void readNTExportDirectory(LPVOID peFileData) {
 	printf("    AddressOfNameOrdinals:                 0x%08X\n", exportDirectoryData->AddressOfNameOrdinals);
 
 	// Print Exported Functions
-	printf("    +--------------------------------------+----------------------+----------------------+\n");
-	printf("    |              Function Name            |  Function Address    |  Ordinal            |\n");
-	printf("    +--------------------------------------+----------------------+----------------------+\n");
+	printf(BOLD "[~] EXPORTED FUNCTIONS\n" RESET);
 
 	// Get the function names
 	DWORD* functionAddresses = (DWORD*)((BYTE*)peFileData + rvaToFileOffset(peFileNtHeader, exportDirectoryData->AddressOfFunctions));
 	DWORD* functionNames = (DWORD*)((BYTE*)peFileData + rvaToFileOffset(peFileNtHeader, exportDirectoryData->AddressOfNames));
 	WORD* functionNameOrdinals = (WORD*)((BYTE*)peFileData + rvaToFileOffset(peFileNtHeader, exportDirectoryData->AddressOfNameOrdinals));
-	
+
 	// Iterate over the exported functions
 	for (DWORD i = 0; i < exportDirectoryData->NumberOfFunctions; i++) {
 		const char* functionName = (const char*)((BYTE*)peFileData + rvaToFileOffset(peFileNtHeader, functionNames[i]));
@@ -321,11 +312,11 @@ void readNTExportDirectory(LPVOID peFileData) {
 		WORD functionNameOrdinal = functionNameOrdinals[i];
 
 		// Print the function information
-		printf("    | %-36s |  0x%08X          |  0x%04X              |\n", functionName, functionAddress, functionNameOrdinal);
+		printf("    Function Name:          %s\n", functionName);
+		printf("        Function Address:       0x%08X\n", functionAddress);
+		printf("        Ordinal:                0x%04X\n", functionNameOrdinal);
+		printf("    ---------------------------------------------------------------\n");
 	}
-
-	// Print table footer
-	printf("    +--------------------------------------+----------------------+----------------------+\n");
 }
 
 void readRelocationTable(LPVOID peFileData) {
@@ -345,14 +336,10 @@ void readRelocationTable(LPVOID peFileData) {
 	DWORD relocationTableOffset = rvaToFileOffset(peFileNtHeader, relocationDirectory->VirtualAddress);
 	PIMAGE_BASE_RELOCATION baseRelocation = (PIMAGE_BASE_RELOCATION)((BYTE*)peFileData + relocationTableOffset);
 
-	// Print table header
-	printf("    +--------------------------------------+----------------------+\n");
-	printf("    |            Page RVA                  |       Block Size     |\n");
-	printf("    +--------------------------------------+----------------------+\n");
-
 	// Iterate over the relocation blocks
 	while (baseRelocation->VirtualAddress != 0) {
-		printf("    |  0x%08X                          |  0x%08X          |\n", baseRelocation->VirtualAddress, baseRelocation->SizeOfBlock);
+		printf("    Page RVA:               0x%08X\n", baseRelocation->VirtualAddress);
+		printf("    Block Size:             0x%08X\n", baseRelocation->SizeOfBlock);
 
 		// Calculate the number of entries in this block
 		DWORD numRelocations = (baseRelocation->SizeOfBlock - sizeof(IMAGE_BASE_RELOCATION)) / sizeof(WORD);
@@ -361,15 +348,13 @@ void readRelocationTable(LPVOID peFileData) {
 		// Iterate over each relocation entry
 		for (DWORD index = 0; index < numRelocations; index++) {
 			WORD relocEntry = relocations[index];
-			DWORD offset = relocEntry & 0xFFF;    // Lower 12 bits = offset (The lower 12 bits specify the offset from the base address where the relocation should be applied.)
-			WORD type = (relocEntry >> 12) & 0xF; // Upper 4 bits = type    (The upper 4 bits specify the type of relocation.)
+			DWORD offset = relocEntry & 0xFFF;    // Lower 12 bits = offset
+			WORD type = (relocEntry >> 12) & 0xF; // Upper 4 bits = type
 
-			printf("    |     - Offset: 0x%03X, Type: %-8s  |                      |\n", offset, getNTImageRelocationType(type));
+			printf("        - Offset: 0x%03X, Type: %s\n", offset, getNTImageRelocationType(type));
 		}
-
+		printf("    ---------------------------------------------------------------\n");
 		// Move to the next relocation block
 		baseRelocation = (PIMAGE_BASE_RELOCATION)((BYTE*)baseRelocation + baseRelocation->SizeOfBlock);
 	}
-
-	printf("    +--------------------------------------+----------------------+\n");
 }
