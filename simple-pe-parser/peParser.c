@@ -286,7 +286,7 @@ void readNTExportDirectory(LPVOID peFileData) {
 
 	// Print Export Directory information
 	printf("    Characteristics:                       0x%08X\n", exportDirectoryData->Characteristics);
-	printf("    TimeDateStamp:                         0x%08X\n", exportDirectoryData->TimeDateStamp);
+	printf("    TimeDateStamp:                         0x%08X (-> %s)\n", exportDirectoryData->TimeDateStamp, convertUnixTimeToHumanReadable(exportDirectoryData->TimeDateStamp));
 	printf("    MajorVersion:                          0x%04X\n", exportDirectoryData->MajorVersion);
 	printf("    MinorVersion:                          0x%04X\n", exportDirectoryData->MinorVersion);
 	printf("    Name:                                  0x%08X\n", exportDirectoryData->Name);
@@ -297,25 +297,32 @@ void readNTExportDirectory(LPVOID peFileData) {
 	printf("    AddressOfNames:                        0x%08X\n", exportDirectoryData->AddressOfNames);
 	printf("    AddressOfNameOrdinals:                 0x%08X\n", exportDirectoryData->AddressOfNameOrdinals);
 
+	// Get DLL name.
+	// If the parser is examining a DLL, "const char* dllName" will be identical to the original DLL name(probably the filename)
+	DWORD nameOffset = rvaToFileOffset(peFileNtHeader, exportDirectoryData->Name);
+	const char* dllName = (const char*)((BYTE*)peFileData + nameOffset);
+	printf("    DLL Name:                              %s\n", dllName);
+
 	// Print Exported Functions
 	printf(BOLD "[~] EXPORTED FUNCTIONS\n" RESET);
 
-	// Get the function names
-	DWORD* functionAddresses = (DWORD*)((BYTE*)peFileData + rvaToFileOffset(peFileNtHeader, exportDirectoryData->AddressOfFunctions));
-	DWORD* functionNames = (DWORD*)((BYTE*)peFileData + rvaToFileOffset(peFileNtHeader, exportDirectoryData->AddressOfNames));
-	WORD* functionNameOrdinals = (WORD*)((BYTE*)peFileData + rvaToFileOffset(peFileNtHeader, exportDirectoryData->AddressOfNameOrdinals));
+	DWORD* functionsRVA = (DWORD*)((BYTE*)peFileData + rvaToFileOffset(peFileNtHeader, exportDirectoryData->AddressOfFunctions));
+	DWORD* namesRVA = (DWORD*)((BYTE*)peFileData + rvaToFileOffset(peFileNtHeader, exportDirectoryData->AddressOfNames));
+	WORD* ordinals = (WORD*)((BYTE*)peFileData + rvaToFileOffset(peFileNtHeader, exportDirectoryData->AddressOfNameOrdinals));
 
-	// Iterate over the exported functions
-	for (DWORD i = 0; i < exportDirectoryData->NumberOfFunctions; i++) {
-		const char* functionName = (const char*)((BYTE*)peFileData + rvaToFileOffset(peFileNtHeader, functionNames[i]));
-		DWORD functionAddress = functionAddresses[i];
-		WORD functionNameOrdinal = functionNameOrdinals[i];
+	for (DWORD index = 0; index < exportDirectoryData->NumberOfFunctions; index++) {
+		DWORD nameRVA = namesRVA[index];
+		DWORD functionNameOffset = rvaToFileOffset(peFileNtHeader, nameRVA);
+		char* functionName = (char*)((BYTE*)peFileData + functionNameOffset);
 
-		// Print the function information
-		printf("    Function Name:          %s\n", functionName);
-		printf("        Function Address:       0x%08X\n", functionAddress);
-		printf("        Ordinal:                0x%04X\n", functionNameOrdinal);
-		printf("    ---------------------------------------------------------------\n");
+		// Get the function's ordinal (index in the Export Address Table)
+		WORD ordinal = ordinals[index] + exportDirectoryData->Base;		// Base is the starting ordinal
+		DWORD functionRVA = functionsRVA[ordinals[index]];				// The address of the function is at the same index as the ordinal in the EAT(AddressOfFunctions)
+
+		printf("	Function Name:          %s\n", functionName);
+		printf("		Function Address:       0x%08X\n", functionRVA);
+		printf("		Ordinal:                0x%04X\n", ordinal);
+		printf("	---------------------------------------------------------------\n");
 	}
 }
 
