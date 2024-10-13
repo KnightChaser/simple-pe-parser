@@ -33,6 +33,7 @@ void parse(LPVOID peFileData) {
 	readNTFileDataDirectoryEntries(peFileData);
 	readNTFileSectionHeaders(peFileData);
 	readNTImportAddressTable(peFileData);
+	readNTExportDirectory(peFileData);
 	readRelocationTable(peFileData);
 }
 
@@ -219,7 +220,7 @@ void readNTImportAddressTable(LPVOID peFileData) {
 	PIMAGE_DATA_DIRECTORY importDirectory = &peFileNtOptionalHeader->DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT];
 
 	if (!importDirectory->VirtualAddress || !importDirectory->Size) {
-		printf("No Import Address Table found.\n");
+		printf(RED BOLD "[!] No Import Address Table found.\n" RESET);
 		return;
 	}
 
@@ -271,6 +272,60 @@ void readNTImportAddressTable(LPVOID peFileData) {
 
 	// Print table footer
 	printf("    +--------------------------------------------------------------+----------------------+----------------------+\n");
+}
+
+void readNTExportDirectory(LPVOID peFileData) {
+	// Get NT headers
+	PIMAGE_NT_HEADERS peFileNtHeader = (PIMAGE_NT_HEADERS)((BYTE*)peFileData + ((PIMAGE_DOS_HEADER)peFileData)->e_lfanew);
+	PIMAGE_OPTIONAL_HEADER peFileNtOptionalHeader = &peFileNtHeader->OptionalHeader;
+	PIMAGE_DATA_DIRECTORY exportDirectory = &peFileNtOptionalHeader->DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT];
+
+	if (!exportDirectory->VirtualAddress || !exportDirectory->Size) {
+		printf(RED BOLD "[!] No Export Directory found.\n" RESET);
+		return;
+	}
+
+	printf(BOLD "[~] EXPORT DIRECTORY\n" RESET);
+
+	// Convert Export Directory RVA to file offset
+	DWORD exportDirectoryOffset = rvaToFileOffset(peFileNtHeader, exportDirectory->VirtualAddress);
+	PIMAGE_EXPORT_DIRECTORY exportDirectoryData = (PIMAGE_EXPORT_DIRECTORY)((BYTE*)peFileData + exportDirectoryOffset);
+
+	// Print Export Directory information
+	printf("    Characteristics:                       0x%08X\n", exportDirectoryData->Characteristics);
+	printf("    TimeDateStamp:                         0x%08X\n", exportDirectoryData->TimeDateStamp);
+	printf("    MajorVersion:                          0x%04X\n", exportDirectoryData->MajorVersion);
+	printf("    MinorVersion:                          0x%04X\n", exportDirectoryData->MinorVersion);
+	printf("    Name:                                  0x%08X\n", exportDirectoryData->Name);
+	printf("    Base:                                  0x%08X\n", exportDirectoryData->Base);
+	printf("    NumberOfFunctions:                     0x%08X\n", exportDirectoryData->NumberOfFunctions);
+	printf("    NumberOfNames:                         0x%08X\n", exportDirectoryData->NumberOfNames);
+	printf("    AddressOfFunctions:                    0x%08X\n", exportDirectoryData->AddressOfFunctions);
+	printf("    AddressOfNames:                        0x%08X\n", exportDirectoryData->AddressOfNames);
+	printf("    AddressOfNameOrdinals:                 0x%08X\n", exportDirectoryData->AddressOfNameOrdinals);
+
+	// Print Exported Functions
+	printf("    +--------------------------------------+----------------------+----------------------+\n");
+	printf("    |              Function Name            |  Function Address    |  Ordinal            |\n");
+	printf("    +--------------------------------------+----------------------+----------------------+\n");
+
+	// Get the function names
+	DWORD* functionAddresses = (DWORD*)((BYTE*)peFileData + rvaToFileOffset(peFileNtHeader, exportDirectoryData->AddressOfFunctions));
+	DWORD* functionNames = (DWORD*)((BYTE*)peFileData + rvaToFileOffset(peFileNtHeader, exportDirectoryData->AddressOfNames));
+	WORD* functionNameOrdinals = (WORD*)((BYTE*)peFileData + rvaToFileOffset(peFileNtHeader, exportDirectoryData->AddressOfNameOrdinals));
+	
+	// Iterate over the exported functions
+	for (DWORD i = 0; i < exportDirectoryData->NumberOfFunctions; i++) {
+		const char* functionName = (const char*)((BYTE*)peFileData + rvaToFileOffset(peFileNtHeader, functionNames[i]));
+		DWORD functionAddress = functionAddresses[i];
+		WORD functionNameOrdinal = functionNameOrdinals[i];
+
+		// Print the function information
+		printf("    | %-36s |  0x%08X          |  0x%04X              |\n", functionName, functionAddress, functionNameOrdinal);
+	}
+
+	// Print table footer
+	printf("    +--------------------------------------+----------------------+----------------------+\n");
 }
 
 void readRelocationTable(LPVOID peFileData) {
